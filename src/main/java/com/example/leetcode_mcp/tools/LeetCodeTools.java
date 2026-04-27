@@ -18,36 +18,30 @@ public class LeetCodeTools {
     @Tool(description = """
             Returns the LeetCode profile for one or more users including global ranking,
             reputation, star rating, and total accepted submissions by difficulty (Easy, Medium, Hard).
-            Pass a single username or a comma-separated list of usernames to compare multiple users.
+            Pass a single username or a list of usernames to compare multiple users in parallel.
             Returns an error message for any invalid or non-existent username.
             """)
     public String getUserProfile(final List<String> usernames) {
-        return usernames.stream()
-                .map(username -> {
-                    var result = client.getUserProfile(username);
-                    if (result.contains("\"matchedUser\":null")) {
-                        return "User not found: " + username;
-                    }
-                    return result;
-                })
+        return client.getUserProfilesInParallel(usernames)
+                .stream()
+                .map(result -> result.contains("\"matchedUser\":null")
+                        ? "User not found: " + result
+                        : result)
                 .reduce("", (a, b) -> a + "\n" + b);
     }
 
     @Tool(description = """
             Returns problems solved broken down by difficulty (Easy, Medium, Hard)
-            for one or more LeetCode users.
-            Pass a single username or a comma-separated list of usernames to compare multiple users.
+            for one or more LeetCode users, fetched in parallel.
+            Pass a single username or a list of usernames to compare multiple users.
             Returns an error message for any invalid or non-existent username.
             """)
     public String getProblemStats(final List<String> usernames) {
-        return usernames.stream()
-                .map(username -> {
-                    var result = client.getProblemStats(username);
-                    if (result.contains("\"matchedUser\":null")) {
-                        return "User not found: " + username;
-                    }
-                    return result;
-                })
+        return client.getProblemStatsInParallel(usernames)
+                .stream()
+                .map(result -> result.contains("\"matchedUser\":null")
+                        ? "User not found: " + result
+                        : result)
                 .reduce("", (a, b) -> a + "\n" + b);
     }
 
@@ -68,15 +62,17 @@ public class LeetCodeTools {
     }
 
     @Tool(description = """
-            Returns contest history for a single LeetCode user including contest rating,
-            global ranking, total participants, top percentage, and contests attended.
-            Returns an error message if the username is invalid or user has no contest history.
-            """)
-    public String getContestHistory(final String username) {
-        var result = client.getContestHistory(username);
-        if (result.contains("\"userContestRanking\":null")) {
-            return "User not found or no contest history for: " + username;
-        }
-        return result;
+        Returns contest history for one or more LeetCode users including contest rating,
+        global ranking, total participants, top percentage, and contests attended.
+        Pass a single username or a list of usernames to compare multiple users in parallel.
+        Returns an error message if the username is invalid or user has no contest history.
+        """)
+    public String getContestHistory(final List<String> usernames) {
+        return client.getContestHistoryInParallel(usernames)
+                .stream()
+                .map(result -> result.contains("\"userContestRanking\":null")
+                        ? "User not found or no contest history: " + result
+                        : result)
+                .reduce("", (a, b) -> a + "\n" + b);
     }
 }

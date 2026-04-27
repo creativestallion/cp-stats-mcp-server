@@ -3,6 +3,9 @@ package com.example.leetcode_mcp.client;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
+import java.util.concurrent.Executors;
+
 @Component
 public class LeetCodeClient {
 
@@ -69,7 +72,7 @@ public class LeetCodeClient {
         return rawQuery(query);
     }
 
-    public String getContestHistory(String username) {
+    public String getContestHistory(final String username) {
         var query = """
                 {
                   userContestRanking(username: "%s") {
@@ -82,6 +85,54 @@ public class LeetCodeClient {
                 }
                 """.formatted(username);
         return rawQuery(query);
+    }
+
+    public List<String> getUserProfilesInParallel(final List<String> usernames) {
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var futures = usernames.stream()
+                    .map(username -> executor.submit(() -> getUserProfile(username)))
+                    .toList();
+            return futures.stream()
+                    .map(future -> {
+                        try {
+                            return future.get();
+                        } catch (Exception e) {
+                            return "Error fetching: " + e.getMessage();
+                        }
+                    })
+                    .toList();
+        }
+    }
+
+    public List<String> getContestHistoryInParallel(final List<String> usernames) {
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var futures = usernames.stream()
+                    .map(username -> executor.submit(() -> getContestHistory(username)))
+                    .toList();
+            return futures.stream()
+                    .map(future -> {
+                        try { return future.get(); }
+                        catch (Exception e) { return "Error fetching: " + e.getMessage(); }
+                    })
+                    .toList();
+        }
+    }
+
+    public List<String> getProblemStatsInParallel(final List<String> usernames) {
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var futures = usernames.stream()
+                    .map(username -> executor.submit(() -> getProblemStats(username)))
+                    .toList();
+            return futures.stream()
+                    .map(future -> {
+                        try {
+                            return future.get();
+                        } catch (Exception e) {
+                            return "Error fetching: " + e.getMessage();
+                        }
+                    })
+                    .toList();
+        }
     }
 
     private String rawQuery(final String graphqlQuery) {

@@ -1,0 +1,6 @@
+target/*
+!target/leetcode-mcp-0.0.1-SNAPSHOT.jar
+.idea/
+*.iml
+.git/
+.DS_Store

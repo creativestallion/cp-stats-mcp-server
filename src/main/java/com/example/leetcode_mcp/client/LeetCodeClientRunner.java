@@ -14,24 +14,6 @@ public class LeetCodeClientRunner implements CommandLineRunner {
         this.client = client;
     }
 
-    //    @Override
-//    public void run(String... args) {
-//        var query = """
-//                {
-//                  matchedUser(username: "%s") {
-//                    username
-//                    submitStats {
-//                      acSubmissionNum {
-//                        difficulty
-//                        count
-//                      }
-//                    }
-//                  }
-//                }
-//                """.formatted(client.getUsername());
-//
-//        System.err.println(client.query(query));
-//    }
     @Override
     public void run(String... args) {
         System.err.println("=== USER PROFILE ===");
