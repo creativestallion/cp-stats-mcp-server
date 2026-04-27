@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: leetcode-mcp-server
+  main:
+    web-application-type: none
+  ai:
+    mcp:
+      server:
+        name: leetcode-mcp-server
+        version: 0.1.0
+
+leetcode:
+  username: prashuchaudhry
+
+logging:
+  level:
+    root: WARN
