@@ -22,7 +22,7 @@ public class LeetCodeTools {
             Returns an error message for any invalid or non-existent username.
             """)
     public String getUserProfile(final List<String> usernames) {
-        return client.getUserProfilesInParallel(usernames)
+        return client.getProfilesInParallel(usernames)
                 .stream()
                 .map(result -> result.contains("\"matchedUser\":null")
                         ? "User not found: " + result

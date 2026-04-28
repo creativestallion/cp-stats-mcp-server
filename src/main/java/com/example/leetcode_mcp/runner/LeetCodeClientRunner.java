@@ -1,5 +1,6 @@
-package com.example.leetcode_mcp.client;
+package com.example.leetcode_mcp.runner;
 
+import com.example.leetcode_mcp.client.LeetCodeClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ public class LeetCodeClientRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         System.err.println("=== USER PROFILE ===");
-        System.err.println(client.getUserProfile("prashuchaudhry"));
+        System.err.println(client.getProfile("prashuchaudhry"));
 
         System.err.println("=== PROBLEM STATS ===");
         System.err.println(client.getProblemStats("prashuchaudhry"));

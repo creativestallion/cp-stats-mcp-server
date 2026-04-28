@@ -1,5 +1,6 @@
 package com.example.leetcode_mcp;
 
+import com.example.leetcode_mcp.tools.CodeforcesTools;
 import com.example.leetcode_mcp.tools.LeetCodeTools;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
@@ -15,9 +16,10 @@ public class LeetcodeMcpApplication {
     }
 
     @Bean
-    public ToolCallbackProvider leetCodeToolCallbackProvider(LeetCodeTools tools) {
-        return MethodToolCallbackProvider.builder()
-                .toolObjects(tools)
+    public ToolCallbackProvider toolCallbackProvider(final LeetCodeTools lcTools, final CodeforcesTools cfTools) {
+        return MethodToolCallbackProvider
+                .builder()
+                .toolObjects(lcTools, cfTools)
                 .build();
     }
 }
