@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
-public class CodeforcesClient implements PlatformClient {
+public class CodeforcesClient implements CompetitiveProgrammingClient {
 
     private final WebClient webClient;
 
@@ -35,7 +35,7 @@ public class CodeforcesClient implements PlatformClient {
     }
 
     @Override
-    public String getRecentSubmissions(final String handle, int limit) {
+    public String getRecentActivity(final String handle, int limit) {
         if (limit < 1) limit = 10;
         if (limit > 50) limit = 50;
         return webClient.get()

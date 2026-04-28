@@ -1,20 +1,24 @@
-# LeetCode MCP Server
+# CP Stats MCP Server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server built with **Java 21** and **Spring Boot**, that exposes your LeetCode profile data as tools for LLMs like Claude Desktop and Cursor.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server built with **Java 21** and **Spring Boot** that exposes competitive programming and developer profile data as tools for LLMs like Claude Desktop and Cursor.
 
 Ask Claude things like:
-- _"How many medium problems this user solved?"_
-- _"What's the current contest rating?"_
-- _"Show me the last 10 submissions"_
-- _"Compare problem stats for userA, userB, userC.."_
+- _"How many medium problems have I solved on LeetCode?"_
+- _"What's my Codeforces contest rating?"_
+- _"Compare LeetCode stats for prashuchaudhry and neal_wu"_
+- _"Compare Codeforces ratings for tourist and benq"_
+- _"Show me creativestallion's top GitHub repositories"_
+- _"Compare GitHub profiles for torvalds and gvanrossum"_
 
 ---
 
-## Demo
+[//]: # (## Demo)
 
-> _Add your GIF here — record a short Claude Desktop session querying your profile_
+[//]: # ()
+[//]: # (> _Add your GIF here_)
 
----
+[//]: # ()
+[//]: # (---)
 
 ## Architecture
 
@@ -23,25 +27,54 @@ Claude Desktop
      │
      │  stdio (JSON-RPC)
      ▼
-Spring Boot MCP Server  ──►  LeetCode GraphQL API
-(your tools run here)         https://leetcode.com/graphql
+Spring Boot MCP Server
+     ├──► LeetCode GraphQL API
+     ├──► Codeforces REST API
+     └──► GitHub REST API
 ```
 
 - Claude Desktop launches the JAR as a subprocess
 - Communication happens over **stdio** using the MCP protocol
-- The server calls LeetCode's **unauthenticated public GraphQL API**
+- All APIs are **public and unauthenticated**
 - Multi-user queries run in **parallel using Java 21 virtual threads**
+
+---
+
+## Supported Platforms
+
+| Platform | Type | Status |
+|----------|------|--------|
+| LeetCode | Unofficial GraphQL | ✅ Supported |
+| Codeforces | Official REST API | ✅ Supported |
+| GitHub | Official REST API | ✅ Supported |
+| More | — | 🔜 Roadmap |
 
 ---
 
 ## Tools Exposed
 
+### LeetCode
 | Tool | Description | Multi-user |
 |------|-------------|------------|
 | `getUserProfile` | Global ranking, reputation, star rating, solve counts | ✅ parallel |
 | `getProblemStats` | Easy / Medium / Hard breakdown | ✅ parallel |
-| `getRecentSubmissions` | Last N accepted submissions with language and timestamp | ❌ single user |
+| `getRecentActivity` | Last N accepted submissions with language and timestamp | ❌ single user |
 | `getContestHistory` | Contest rating, global rank, top %, contests attended | ✅ parallel |
+
+### Codeforces
+| Tool | Description | Multi-user |
+|------|-------------|------------|
+| `getCodeforcesProfile` | Rating, rank, name | ✅ parallel |
+| `getCodeforcesProblemStats` | Accepted submission stats | ✅ parallel |
+| `getCodeforcesRecentActivity` | Last N submissions with verdict and language | ❌ single user |
+| `getCodeforcesContestHistory` | Full contest rating history | ✅ parallel |
+
+### GitHub
+| Tool | Description | Multi-user |
+|------|-------------|------------|
+| `getGitHubProfile` | Name, bio, public repos, followers, following | ✅ parallel |
+| `getGitHubRepositories` | Top 10 repos by stars with language and forks | ✅ parallel |
+| `getGitHubRecentActivity` | Last N public events — pushes, PRs, issues | ❌ single user |
 
 ---
 
@@ -50,7 +83,7 @@ Spring Boot MCP Server  ──►  LeetCode GraphQL API
 - Java 21 (virtual threads for parallel API calls)
 - Spring Boot 3.5.x
 - Spring AI 1.0.1 — MCP Server starter
-- Spring WebFlux — WebClient for GraphQL calls
+- Spring WebFlux — WebClient for all API calls
 - Docker
 
 ---
@@ -84,7 +117,7 @@ Edit `claude_desktop_config.json` and add:
 ```json
 {
   "mcpServers": {
-    "leetcode": {
+    "cp-stats": {
       "command": "java",
       "args": [
         "-jar",
@@ -97,15 +130,16 @@ Edit `claude_desktop_config.json` and add:
 
 ### 3. Restart Claude Desktop
 
-Fully quit (Cmd+Q) and reopen. You should see the hammer 🔨 icon in the chat input — that means the MCP server is connected.
+Fully quit (Cmd+Q) and reopen. Look for the hammer 🔨 icon in the chat input — that confirms the MCP server is connected.
 
 ### 4. Try it
 
 ```
-What's the LeetCode profile for prashuchaudhry?
-Compare problem stats for prashuchaudhry and neal_wu
-Show me the last 5 submissions for prashuchaudhry
-What's the contest rating for prashuchaudhry?
+Compare LeetCode problem stats for prashuchaudhry and neal_wu
+What's the Codeforces rating for tourist?
+Compare GitHub profiles for torvalds and gvanrossum
+Show recent activity for creativestallion on GitHub
+Compare contest history for tourist and benq on Codeforces
 ```
 
 ---
@@ -113,21 +147,21 @@ What's the contest rating for prashuchaudhry?
 ## Run with Docker
 
 ```bash
-docker build -t leetcode-mcp-server .
+docker build -t cp-stats-mcp-server .
 ```
 
-To use the Docker image with Claude Desktop, update your config:
+Update your Claude Desktop config to use Docker:
 
 ```json
 {
   "mcpServers": {
-    "leetcode": {
+    "cp-stats": {
       "command": "docker",
       "args": [
         "run",
         "--rm",
         "-i",
-        "leetcode-mcp-server"
+        "cp-stats-mcp-server"
       ]
     }
   }
@@ -138,55 +172,65 @@ To use the Docker image with Claude Desktop, update your config:
 
 ## Development
 
-### Run locally
+### Test individual platform clients
 
 ```bash
-mvn spring-boot:run
-```
-
-### Test the GraphQL client directly
-
-```bash
+# LeetCode
 mvn spring-boot:run -Dspring-boot.run.profiles=test-client
+
+# Codeforces
+mvn spring-boot:run -Dspring-boot.run.profiles=test-cf
+
+# GitHub
+mvn spring-boot:run -Dspring-boot.run.profiles=test-gh
 ```
 
 ### Project structure
 
 ```
 src/main/java/com/example/leetcode_mcp/
-├── LeetcodeMcpApplication.java       # App entry point, tool registration
+├── LeetcodeMcpApplication.java              # Entry point, tool registration
 ├── client/
-│   ├── LeetCodeClient.java           # WebClient + GraphQL queries
-│   └── LeetCodeClientRunner.java     # Dev test runner (test-client profile)
+│   ├── PlatformClient.java                  # Base interface (profile, recent activity)
+│   ├── CompetitiveProgrammingClient.java    # CP interface (problem stats, contest history)
+│   ├── LeetCodeClient.java                  # implements CompetitiveProgrammingClient
+│   ├── CodeforcesClient.java                # implements CompetitiveProgrammingClient
+│   ├── GitHubClient.java                    # implements PlatformClient
+│   ├── LeetCodeClientRunner.java            # Dev test runner (test-client profile)
+│   ├── CodeforcesClientRunner.java          # Dev test runner (test-cf profile)
+│   └── GitHubClientRunner.java             # Dev test runner (test-gh profile)
 └── tools/
-    └── LeetCodeTools.java            # @Tool definitions exposed via MCP
+    ├── LeetCodeTools.java                   # LeetCode @Tool definitions
+    ├── CodeforcesTools.java                 # Codeforces @Tool definitions
+    └── GitHubTools.java                     # GitHub @Tool definitions
 ```
 
 ---
 
 ## Key Design Decisions
 
+**Why a two-level interface hierarchy?**
+`PlatformClient` defines capabilities every platform shares — profile and recent activity. `CompetitiveProgrammingClient` extends it with CP-specific capabilities — problem stats and contest history. LeetCode and Codeforces implement the full CP interface. GitHub implements only the base. Adding a new platform means picking the right interface and implementing it — nothing else changes.
+
 **Why virtual threads?**
-Multi-user queries (e.g. comparing 3 candidates) fire all API calls in parallel using `Executors.newVirtualThreadPerTaskExecutor()`. This cuts latency proportionally to the number of users with zero thread pool tuning.
+Multi-user queries fire all API calls in parallel using `Executors.newVirtualThreadPerTaskExecutor()`. Latency scales with the slowest single call, not the sum of all calls. I/O-bound work like HTTP calls is exactly the use case virtual threads are designed for.
 
 **Why stdio transport?**
-Claude Desktop communicates with MCP servers over stdin/stdout. No HTTP server needed, no ports, no auth. The JAR is launched as a subprocess and exits when the session ends.
+Claude Desktop communicates with MCP servers over stdin/stdout. No HTTP server, no ports, no auth. The JAR is launched as a subprocess per session and exits when done.
 
 **Why no database or cache?**
-LeetCode's public API responds in ~200ms. The server is stateless by design — no persistence layer means nothing to operate, nothing to secure, nothing to break.
+All queried data is public and live. The server is stateless by design — nothing to operate, nothing to secure, nothing to break.
 
 **Why no authentication?**
-All data queried is publicly visible on LeetCode profiles. No login, no API key, no OAuth required.
+LeetCode GraphQL, Codeforces REST, and GitHub REST all serve public profile data without any API key or login.
 
 ---
 
-## About
+## Roadmap
 
-Built as a portfolio project to demonstrate:
-- Spring AI MCP server implementation
-- Java 21 virtual threads for I/O parallelism
-- GraphQL API integration with WebClient
-- Clean tool design for LLM consumption
+- [ ] AtCoder support
+- [ ] Web UI for browser-based access
+- [ ] Cross-platform comparison (LeetCode + Codeforces + GitHub in one query)
 
 ---
 

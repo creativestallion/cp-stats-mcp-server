@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
-public class LeetCodeClient implements PlatformClient {
+public class LeetCodeClient implements CompetitiveProgrammingClient {
 
     private final WebClient webClient;
 
@@ -58,7 +58,7 @@ public class LeetCodeClient implements PlatformClient {
     }
 
     @Override
-    public String getRecentSubmissions(final String username, int limit) {
+    public String getRecentActivity(final String username, int limit) {
         if (limit < 1) limit = 10;
         if (limit > 20) limit = 20;
         var query = """

@@ -24,7 +24,7 @@ public class LeetCodeClientRunner implements CommandLineRunner {
         System.err.println(client.getProblemStats("prashuchaudhry"));
 
         System.err.println("=== RECENT SUBMISSIONS ===");
-        System.err.println(client.getRecentSubmissions("prashuchaudhry", 5));
+        System.err.println(client.getRecentActivity("prashuchaudhry", 5));
 
         System.err.println("=== CONTEST HISTORY ===");
         System.err.println(client.getContestHistory("cosmicleo"));

@@ -54,7 +54,7 @@ public class LeetCodeTools {
     public String getRecentSubmissions(final String username, int limit) {
         if (limit < 1) limit = 10;
         if (limit > 20) limit = 20;
-        var result = client.getRecentSubmissions(username, limit);
+        var result = client.getRecentActivity(username, limit);
         if (result.contains("\"recentAcSubmissionList\":null")) {
             return "User not found: " + username;
         }

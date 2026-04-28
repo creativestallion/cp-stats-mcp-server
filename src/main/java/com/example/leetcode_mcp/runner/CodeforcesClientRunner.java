@@ -26,7 +26,7 @@ public class CodeforcesClientRunner implements CommandLineRunner {
         System.err.println(client.getProblemStats("tourist"));
 
         System.err.println("=== CF RECENT SUBMISSIONS ===");
-        System.err.println(client.getRecentSubmissions("tourist", 5));
+        System.err.println(client.getRecentActivity("tourist", 5));
 
         System.err.println("=== CF CONTEST HISTORY ===");
         System.err.println(client.getContestHistory("tourist"));

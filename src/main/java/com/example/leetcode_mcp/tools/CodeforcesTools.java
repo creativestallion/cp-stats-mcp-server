@@ -50,7 +50,7 @@ public class CodeforcesTools {
             Default limit is 10, maximum is 50.
             """)
     public String getCodeforcesRecentSubmissions(final String handle, int limit) {
-        var result = client.getRecentSubmissions(handle, limit);
+        var result = client.getRecentActivity(handle, limit);
         if (result.contains("\"status\":\"FAILED\"")) {
             return "User not found: " + handle;
         }
